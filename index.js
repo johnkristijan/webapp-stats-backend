@@ -5,7 +5,7 @@ app.use(cors({
     origin: '*'
 }))
 app.use(express.json())
-const port = 3030
+const port = process.env.PORT || 80
 
 app.get('/', (req, res) => {
   res.send('Server is alive and well!')
