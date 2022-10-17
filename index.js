@@ -51,13 +51,14 @@ app.get('/get-stats', async (req, res) => {
     try {
         const appId = req.query.app_id
         if (!appId) {
-          res.status(400).send('[Error 005] Could not get stats.')
+            res.status(400).send('[Error 005] Could not get stats.')
         }
         const SQL_QUERY = `SELECT * FROM stats WHERE app_id='${appId}';`
         const raw = await sqlQuery(SQL_QUERY)
         res.status(200).send(raw.rows)
     } catch (e) {
-      res.status(400).send('[Error 006] Could not get stats.')
+        console.warn(e.message)
+        res.status(400).send('[Error 006] Could not get stats.')
     }
 })
 
