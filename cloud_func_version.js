@@ -15,7 +15,6 @@ functions.http('endpoint', async (req, res) => {
         res.set('Access-Control-Max-Age', '3600');
         res.status(204).send('');
     } else {
-        console.log(JSON.stringify(req.headers));
 
         // check if type is provided
         if (!req.query.type) {
@@ -68,7 +67,20 @@ const webappStats = async (req, res) => {
     console.info('>>> webappStats api triggered <<<')
 
     try {
-        const ipAddress = req.socket.remoteAddress || 'unknown';
+
+        let ipAddress = 'unknown'
+
+        const forwardedHeader = req.headers.forwarded
+        if (forwardedHeader) {
+            // forwardedHeader example => for="109.108.216.147";proto=https
+            const splitHeader = forwardedHeader.split('"')
+            if (splitHeader && splitHeader.length > 1) {
+                ipAddress = splitHeader[1]
+            } else {
+                ipAddress = forwardedHeader
+            }
+        }
+
         const statList = req.body // <<< list of entries
         let SQL_VALUES = []
         for (const x of statList) {
