@@ -27,13 +27,11 @@ app.post('/webapp-stats', async (req, res) => {
                 `('${x.app_id}', '${x.from_path}', '${x.to_path}', '${x.screen_height}', '${x.screen_width}', '${x.user}', '${x.timestamp}')`
             )
         }
-
         const VALUES = SQL_VALUES.join(',')
-
-        const FIELDS =
-            'app_id, from_path, to_path, screen_height, screen_width, username, timestamp'
-
-        const SQL_QUERY = `INSERT INTO stats (${FIELDS}) VALUES ${VALUES};`
+        const SQL_QUERY = {
+            query: `INSERT INTO stats (app_id, from_path, to_path, screen_height, screen_width, username, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+            values: VALUES,
+        }
 
         const raw = await sqlQuery(SQL_QUERY)
         if (raw && raw.rowCount && raw.rowCount > 0) {
@@ -53,7 +51,10 @@ app.get('/get-stats', async (req, res) => {
         if (!appId) {
             res.status(400).send('[Error 005] Could not get stats.')
         }
-        const SQL_QUERY = `SELECT * FROM stats WHERE app_id='${appId}';`
+        const SQL_QUERY = {
+            query: `SELECT * FROM stats WHERE app_id = $1;`,
+            values: [appId],
+        }
         const raw = await sqlQuery(SQL_QUERY)
         res.status(200).send(raw.rows)
     } catch (e) {
@@ -66,9 +67,10 @@ app.post('/register', async (req, res) => {
     const appId = v4()
     const appName = req.query.app_name
     const appContact = req.query.app_contact
-    const FIELDS = 'app_id, app_name, app_contact'
-    const VALUES = `('${appId}', '${appName}', '${appContact}')`
-    const SQL_QUERY = `INSERT INTO apps (${FIELDS}) VALUES ${VALUES};`
+    const SQL_QUERY = {
+        query: `INSERT INTO apps (app_id, app_name, app_contact) VALUES ($1, $2, $3);`,
+        values: [appId, appName, appContact],
+    }
     const raw = await sqlQuery(SQL_QUERY)
     try {
         const rowCount = raw.rowCount
